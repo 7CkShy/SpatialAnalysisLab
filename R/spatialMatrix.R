@@ -28,8 +28,6 @@ cm_sf = raw_data |>
   bind_cols(
     data.frame("Lisa_cm" = lisa_cm$lisa_vals)
   )
-  
-plot(cm_sf["Lisa_cm"])
 
 library(ggplot2)
 
@@ -37,3 +35,37 @@ ggplot(cm_sf) +
   geom_sf(aes(fill = Lisa_cm)) +
   scale_fill_viridis_c() +
   theme_minimal()
+
+localg_crmprp <- local_g(queen_w, raw_data["Crm_prp"])
+
+splilabel = lisa_labels(localg_crmprp)
+splisac = lisa_clusters(localg_crmprp)
+splisac = factor(splilabel[splisac + 1], levels = splilabel)
+
+local_g_plot = \(sf, col_name, w_type, cpu_n, cutoff, p_on){
+  if (w_type == "queen") {
+    w = rgeoda::queen_weights(sf)
+  } else if (w_type == "rook") {
+    w = rgeoda::rook_weights(sf)
+  }
+  var_df = sf |> 
+    sf::st_drop_geometry() |> 
+    dplyr::select(col_name)
+  tlisa = rgeoda::local_g(w, var_df, cpu_threads = cpu_n, significance_cutoff = cutoff)
+  lisalabel = rgeoda::lisa_labels(tlisa)
+  lisa_df = sf |> 
+    dplyr::select(col_name) |> 
+    mutate(
+      lisaindex = rgeoda::lisa_clusters(tlisa),
+      lisalabindex = factor(lisalabel[lisaindex + 1], levels = lisalabel), 
+      .before = "geometry"
+    )
+    return(lisa_df)
+}
+
+a = local_g_plot(raw_data, "Crm_prp", "queen", 6, 0.05, TRUE)
+
+
+raw_data|> 
+    sf::st_drop_geometry() |> 
+    dplyr::select("Crm_prp")
