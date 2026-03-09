@@ -65,7 +65,12 @@ local_g_plot = \(sf, col_name, w_type, cpu_n, cutoff, p_on){
 
 a = local_g_plot(raw_data, "Crm_prp", "queen", 6, 0.05, TRUE)
 
+# ggplot2 practice
+a |> 
+  ggplot() +
+  geom_sf(aes(fill = lisalabindex)) -> p
 
-raw_data|> 
-    sf::st_drop_geometry() |> 
-    dplyr::select("Crm_prp")
+p +
+  scale_fill_discrete(palette = c("#e6e6e6", "red", "blue")) +
+  theme_bw() +
+  guides(fill = guide_legend(title = "LISA"))
