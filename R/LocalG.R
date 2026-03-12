@@ -29,13 +29,6 @@ cm_sf = raw_data |>
     data.frame("Lisa_cm" = lisa_cm$lisa_vals)
   )
 
-library(ggplot2)
-
-ggplot(cm_sf) +
-  geom_sf(aes(fill = Lisa_cm)) +
-  scale_fill_viridis_c() +
-  theme_minimal()
-
 localg_crmprp <- local_g(queen_w, raw_data["Crm_prp"])
 
 splilabel = lisa_labels(localg_crmprp)
@@ -61,6 +54,9 @@ local_g_plot = \(sf, col_name, w_type, cpu_n, cutoff, p_on) {
   lisa_df = sf |>
     dplyr::select(col_name) |>
     mutate(
+      lisaG = rgeoda::lisa_values(tlisa),
+      GMean = mean(lisaG),
+      Pvalue = rgeoda::lisa_pvalues(tlisa),
       lisaindex = rgeoda::lisa_clusters(tlisa),
       lisalabindex = factor(lisalabel[lisaindex + 1], levels = lisalabel),
       .before = "geometry"
@@ -71,6 +67,8 @@ local_g_plot = \(sf, col_name, w_type, cpu_n, cutoff, p_on) {
 a = local_g_plot(raw_data, "Crm_prp", "queen", 6, 0.05, TRUE)
 
 # ggplot2 practice
+library(ggplot2)
+
 a |>
   ggplot() +
   geom_sf(aes(fill = lisalabindex)) -> p
