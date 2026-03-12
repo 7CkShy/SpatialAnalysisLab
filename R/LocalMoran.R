@@ -21,6 +21,8 @@ local_moran_plot = \(sff, col_name, w_t, per_n, cpu_n, cut_off_n) {
   lisa_sf_df = sff |>
     dplyr::select(col_name) |>
     dplyr::mutate(
+      lisaMoran = rgeoda::lisa_values(lisa),
+      Pvalue = rgeoda::lisa_pvalues(lisa),
       lisaIndex = rgeoda::lisa_clusters(lisa),
       lisaLabIndex = factor(lisaLabes[lisaIndex + 1], levels = lisaLabes),
       .before = "geometry"
