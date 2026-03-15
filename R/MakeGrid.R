@@ -148,4 +148,16 @@ m_fishnet_grid = species_point |>
   st_filter(species_point,.predicate = st_intersects) |> 
   st_filter(species_point,.predicate = st_disjoint)
 
-  mapview(area_fishnet_grid)
+mapview(area_fishnet_grid)
+
+# 通过 rasterize 的方式创建网格,我认为适用于大尺度的分析，主要如果我通过创建fishnet的方式，最后也要转化为raster
+r = rast("D:/Climate_Stability_SD/data/pre_variation/monthly_01_warmest_sum.tif")
+
+species_raster = rasterize(
+  species_point,
+  r,
+  fun = "count",
+  na.rm = TRUE
+)
+
+mapview(species_raster)
