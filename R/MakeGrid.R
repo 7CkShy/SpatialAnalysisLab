@@ -10,22 +10,25 @@ species_point = read.csv('./data/species_points.csv') |>
 mapview_test_points = mapview(species_point, cex = 3, alpha = 0.7, popup = NULL)
 mapview_test_points
 
+# 基于数据点创建网格
 area_fishnet_grid = st_make_grid(
   species_point,
-  c(1, 1),
+  cellsize = 1,
   what = "polygons",
   square = TRUE
 )
 
+# 把网格转换为 sf 对象，并添加网格 ID
 area_fishnet_grid |>
   st_as_sf() |>
   mutate(
     grid_id = c(1:length(area_fishnet_grid))
   ) -> fishnet_grid_sf
 
-# count the number of points in each grid cell
+# 利用 st_intersects 计算每个网格内的点数量
 fishnet_grid_sf$n_point = lengths(st_intersects(fishnet_grid_sf, species_point))
 
+# 过滤掉没有点的网格
 fish_count = fishnet_grid_sf |>
   filter(n_point != 0)
 
@@ -134,3 +137,15 @@ st_intersects(test_grid, species_point |> slice(1:10)) |>
 # the difference between length() and lengths()
 # length() return the all length with one number
 # lengths() return the interval length of every elements
+
+# 利用等面积投影，通过单位m的方式创建网格
+m_fishnet_grid = species_point |> 
+  st_transform(32648) |> 
+  st_geometry() |> 
+  st_make_grid(cellsize = 100000, what = "polygons", square = TRUE) |> 
+  st_as_sf() |> 
+  st_transform(4326) |>
+  st_filter(species_point,.predicate = st_intersects) |> 
+  st_filter(species_point,.predicate = st_disjoint)
+
+  mapview(area_fishnet_grid)
