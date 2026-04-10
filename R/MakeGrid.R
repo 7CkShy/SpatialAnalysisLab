@@ -142,9 +142,11 @@ st_intersects(test_grid, species_point |> slice(1:10)) |>
 
 # 栅格化处理得到物种丰富度相关指标数据 ----
 # 通过 rasterize 的方式创建网格,我认为适用于大尺度的分析，主要如果我通过创建fishnet的方式，最后也要转化为raster
-r = rast("D:/Climate_Stability_SD/data/pre_variation/monthly_01_warmest_sum.tif")
+r = rast(
+  "D:/Climate_Stability_SD/data/pre_variation/monthly_01_warmest_sum.tif"
+)
 
-species_point |> 
+species_point |>
   mutate(
     p_value = case_when(
       scientific_name == "bradypus variegatus" ~ 1,
@@ -153,7 +155,7 @@ species_point |>
     )
   ) -> species_point_P
 
-phy_fun = \(x){
+phy_fun = \(x) {
   if (length(x) == 0) {
     p = 1
   } else if (length(x) == 1) {
@@ -169,6 +171,6 @@ species_raster = rasterize(
   r,
   field = "p_value",
   fun = phy_fun
-) 
+)
 
 mapview(species_raster)
